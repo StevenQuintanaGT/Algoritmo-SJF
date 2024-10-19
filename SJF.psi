@@ -1,0 +1,86 @@
+Proceso Tipo
+    Definir id Como Entero
+    Definir rafagaCPU Como Entero
+    Definir tiempoLlegada Como Entero
+    Definir tiempoEspera Como Real
+    Definir tiempoRetorno Como Real
+FinTipo
+
+Algoritmo Main
+    Definir n, tiempoActual Como Entero
+    Definir tiempoEsperaTotal, tiempoRetornoTotal, TME, TMR Como Real
+    Definir procesos, listaEspera, ordenOriginal Como Lista De Proceso
+    Definir p, proceso Como Proceso
+
+    Escribir "Ingrese el número de procesos: ", Sin Saltar
+    Leer n
+
+    // Inicialización de listas
+    procesos <- []
+    listaEspera <- []
+    ordenOriginal <- []
+
+    // Ingreso de datos de cada proceso
+    Para i <- 1 Hasta n Con Paso 1 Hacer
+        Escribir "Proceso ", i, ":"
+        Escribir "Ráfaga de CPU: ", Sin Saltar
+        Leer p.rafagaCPU
+        Escribir "Tiempo de llegada: ", Sin Saltar
+        Leer p.tiempoLlegada
+        p.id <- i
+        p.tiempoEspera <- 0
+        p.tiempoRetorno <- 0
+        procesos[Fin(procesos)+1] <- p
+        ordenOriginal[Fin(ordenOriginal)+1] <- p
+    FinPara
+
+    // Ordenar procesos por tiempo de llegada y ráfaga de CPU
+    Ordenar procesos Por tiempoLlegada ASC, rafagaCPU ASC
+
+    tiempoActual <- 0
+    tiempoEsperaTotal <- 0
+    tiempoRetornoTotal <- 0
+
+    // Procesamiento de los procesos
+    Mientras Longitud(procesos) > 0 O Longitud(listaEspera) > 0 Hacer
+        // Mover procesos que ya llegaron a la lista de espera
+        Mientras Longitud(procesos) > 0 Y procesos[1].tiempoLlegada <= tiempoActual Hacer
+            listaEspera[Fin(listaEspera)+1] <- procesos[1]
+            Eliminar procesos, 1
+        FinMientras
+
+        // Si la lista de espera está vacía, avanzar el tiempo
+        Si Longitud(listaEspera) = 0 Entonces
+            tiempoActual <- procesos[1].tiempoLlegada
+            listaEspera[Fin(listaEspera)+1] <- procesos[1]
+            Eliminar procesos, 1
+        FinSi
+
+        // Ordenar la lista de espera por ráfaga de CPU
+        Ordenar listaEspera Por rafagaCPU ASC
+
+        // Tomar el primer proceso de la lista de espera
+        proceso <- listaEspera[1]
+        Eliminar listaEspera, 1
+        proceso.tiempoEspera <- tiempoActual - proceso.tiempoLlegada
+        tiempoEsperaTotal <- tiempoEsperaTotal + proceso.tiempoEspera
+        tiempoActual <- tiempoActual + proceso.rafagaCPU
+        proceso.tiempoRetorno <- tiempoActual
+        tiempoRetornoTotal <- tiempoRetornoTotal + proceso.tiempoRetorno
+    FinMientras
+
+    // Mostrar resultados
+    Escribir ""
+    Escribir "Proceso       Ráfaga     Llegada     Espera      Retorno"
+    Para i <- 1 Hasta n Con Paso 1 Hacer
+        Escribir "P", ordenOriginal[i].id, "           ", ordenOriginal[i].rafagaCPU, "         ", ordenOriginal[i].tiempoLlegada, "         ", ordenOriginal[i].tiempoEspera, "        ", ordenOriginal[i].tiempoRetorno
+    FinPara
+
+    // Calcular tiempos medios
+    TME <- tiempoEsperaTotal / n
+    TMR <- tiempoRetornoTotal / n
+
+    Escribir ""
+    Escribir "Tiempo Medio de Espera (TME): ", TME
+    Escribir "Tiempo Medio de Retorno (TMR): ", TMR
+FinAlgoritmo
